@@ -206,15 +206,9 @@ class TestInlineMarkdown(unittest.TestCase):
             nodes,
         )
 
-    def test_text_to_textnodes_simple_bold(self):
-        text = "This is **bold** text"
-        nodes = text_to_textnodes(text)
-        print_nodes(nodes)
-
     def test_text_to_textnodes_italic_before_bold(self):
         text = "This is *italic* and then **bold** text"
         nodes = text_to_textnodes(text)
-        print_nodes(nodes)  # For debugging help
         
         expected = [
             TextNode("This is ", TextType.TEXT),
