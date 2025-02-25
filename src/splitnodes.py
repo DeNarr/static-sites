@@ -92,3 +92,18 @@ def extract_markdown_images(text):
 def extract_markdown_links(text):
     matches = re.findall(r"\[(.*?)\]\((.*?)\)",text)
     return matches
+
+def text_to_textnodes(text):
+    nodes = [TextNode(text, TextType.TEXT)]
+    # Each step uses the results of the previous step
+    nodes = split_nodes_image(nodes)
+    nodes = split_nodes_link(nodes)
+    # Handle delimiters in sequence
+    nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD)
+    nodes = split_nodes_delimiter(nodes, "*", TextType.ITALIC)
+    nodes = split_nodes_delimiter(nodes, "`", TextType.CODE)
+    return nodes
+
+def print_nodes(nodes):
+    for i, node in enumerate(nodes):
+        print(f"{i}. {node.text} ({node.text_type})")

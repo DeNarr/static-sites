@@ -186,5 +186,45 @@ class TestInlineMarkdown(unittest.TestCase):
             new_nodes,
         )
 
+    def test_text_to_textnodes(self):
+        nodes = text_to_textnodes(
+            "This is **text** with an *italic* word and a `code block` and an ![image](https://i.imgur.com/zjjcJKZ.png) and a [link](https://boot.dev)"
+        )
+        self.assertListEqual(
+            [
+                TextNode("This is ", TextType.TEXT),
+                TextNode("text", TextType.BOLD),
+                TextNode(" with an ", TextType.TEXT),
+                TextNode("italic", TextType.ITALIC),
+                TextNode(" word and a ", TextType.TEXT),
+                TextNode("code block", TextType.CODE),
+                TextNode(" and an ", TextType.TEXT),
+                TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+                TextNode(" and a ", TextType.TEXT),
+                TextNode("link", TextType.LINK, "https://boot.dev"),
+            ],
+            nodes,
+        )
+
+    def test_text_to_textnodes_simple_bold(self):
+        text = "This is **bold** text"
+        nodes = text_to_textnodes(text)
+        print_nodes(nodes)
+
+    def test_text_to_textnodes_italic_before_bold(self):
+        text = "This is *italic* and then **bold** text"
+        nodes = text_to_textnodes(text)
+        print_nodes(nodes)  # For debugging help
+        
+        expected = [
+            TextNode("This is ", TextType.TEXT),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" and then ", TextType.TEXT),
+            TextNode("bold", TextType.BOLD),
+            TextNode(" text", TextType.TEXT)
+        ]
+        self.assertListEqual(expected, nodes)
+
+
 if __name__ == "__main__":
     unittest.main()
