@@ -1,20 +1,10 @@
 import os
 import shutil
-from textnode import *
-from htmlnode import *
-
-def main():
-    test_obj = TextNode("This is a text node", TextType.BOLD, "www.google.com")
-    print (test_obj)
-    public = "public"
-    if os.path.exists(public):
-        print (f"Removing directory {public}")
-        shutil.rmtree(public)
-    print (f"Creating directory {public}")
-    os.mkdir(public)
-    static_to_public("static", public)
 
 def static_to_public(src_path, dst_path):
+    if not os.path.exists(dst_path):
+        print (f"Creating directory {public}")
+        os.mkdir(public)
     if os.path.exists(src_path):
         files = os.listdir(src_path)
         for file in files:
@@ -27,6 +17,3 @@ def static_to_public(src_path, dst_path):
                 print (f"Creating directory {dpath}")
                 os.mkdir(dpath)
                 static_to_public(spath, dpath)
-
-if __name__ == "__main__":
-    main()
