@@ -3,8 +3,8 @@ import shutil
 
 def static_to_public(src_path, dst_path):
     if not os.path.exists(dst_path):
-        print (f"Creating directory {public}")
-        os.mkdir(public)
+        print (f"Creating directory {dst_path}")
+        os.mkdir(dst_path)
     if os.path.exists(src_path):
         files = os.listdir(src_path)
         for file in files:
