@@ -89,10 +89,21 @@ def markdown_to_html_node(markdown):
             new_nodes.append(ParentNode("pre", [code_node]))
             continue  # Skip the rest of the loop  
         elif block_type == BlockType.QUOTE:
-            # Your existing quote handling code
+            # Split lines and clean them
             lines = block.split('\n')
-            clean_lines = [line.lstrip('>').strip() for line in lines]
-            clean_block = ' '.join(clean_lines)
+            clean_lines = [
+                line.lstrip('>').strip() for line in lines if line.lstrip('>').strip()
+            ]
+            clean_block = ' '.join(clean_lines).strip()  # Join lines with a single space
+
+            # Ensure double-space before '--' if exists
+            if '--' in clean_block:
+                clean_block = clean_block.replace(' --', '  --')
+
+            # Debugging output to verify the block content
+            print(f"DEBUG: clean_block for quote is: '{clean_block}'")
+
+            # Generate children from text
             children = text_to_children(clean_block)
         else:
             children = text_to_children(block)
@@ -129,9 +140,10 @@ def text_to_children(text):
         bold_match = re.search(r"\*\*(.*?)\*\*", text)
         italic_match = re.search(r"_(.*?)_", text)
         code_match = re.search(r"`(.*?)`", text)
+        url_match = re.search(r"\[(.*?)\]\((.*?)\)", text)
         
         # Find the earliest match
-        matches = [m for m in [bold_match, italic_match, code_match] if m is not None]
+        matches = [m for m in [bold_match, italic_match, code_match, url_match] if m is not None]
         if not matches:
             # No matches found, add remaining text
             children.append(text_node_to_html_node(TextNode(text, TextType.TEXT)))
@@ -144,9 +156,15 @@ def text_to_children(text):
         # Add text before the match
         if start > 0:
             children.append(text_node_to_html_node(TextNode(text[:start], TextType.TEXT)))
-            
+
+        # Check if the match is a link
+        if url_match and match == url_match:
+            link_text = url_match.group(1)  # Text inside the brackets
+            link_url = url_match.group(2)   # URL inside the parentheses
+            # Create a ParentNode for the <a> tag
+            children.append(ParentNode("a", [text_node_to_html_node(TextNode(link_text, TextType.TEXT))], {'href': link_url}))       
         # Determine the type and add the formatted text
-        if text[start:].startswith("**"):
+        elif text[start:].startswith("**"):
             children.append(text_node_to_html_node(TextNode(match.group(1), TextType.BOLD)))
         elif text[start:].startswith("_"):
             children.append(text_node_to_html_node(TextNode(match.group(1), TextType.ITALIC)))
@@ -169,3 +187,12 @@ def clean_list_item(item, is_ordered=False):
     else:
         # Remove "- " or "* "
         return re.sub(r'^[-*]\s*', '', item)
+    
+def extract_title(markdown):
+    h1 = ""
+    for line in markdown.split('\n'):
+        if re.match(r"# .*", line):
+            h1 = re.sub(r'^# ', '', line)
+        if h1 == "":
+            raise Exception ("No header")
+    return h1
