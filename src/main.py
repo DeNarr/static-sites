@@ -11,6 +11,10 @@ def main():
     basepath = "/"
     if len(args) > 1:
         basepath = args[1]
+
+    # Normalize `basepath` to always end with a `/`
+    if not basepath.endswith("/"):
+        basepath += "/"
     public = "docs"
     if os.path.exists(public):
         print (f"Removing directory {public}")

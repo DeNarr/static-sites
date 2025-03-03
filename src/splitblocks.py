@@ -101,7 +101,7 @@ def markdown_to_html_node(markdown):
                 clean_block = clean_block.replace(' --', '  --')
 
             # Debugging output to verify the block content
-            print(f"DEBUG: clean_block for quote is: '{clean_block}'")
+            #print(f"DEBUG: clean_block for quote is: '{clean_block}'")
 
             # Generate children from text
             children = text_to_children(clean_block)
@@ -140,10 +140,11 @@ def text_to_children(text):
         bold_match = re.search(r"\*\*(.*?)\*\*", text)
         italic_match = re.search(r"_(.*?)_", text)
         code_match = re.search(r"`(.*?)`", text)
+        image_match = re.search(r"!\[(.*?)\]\((.*?)\)", text)
         url_match = re.search(r"\[(.*?)\]\((.*?)\)", text)
         
         # Find the earliest match
-        matches = [m for m in [bold_match, italic_match, code_match, url_match] if m is not None]
+        matches = [m for m in [bold_match, italic_match, code_match, url_match, image_match] if m is not None]
         if not matches:
             # No matches found, add remaining text
             children.append(text_node_to_html_node(TextNode(text, TextType.TEXT)))
@@ -157,8 +158,13 @@ def text_to_children(text):
         if start > 0:
             children.append(text_node_to_html_node(TextNode(text[:start], TextType.TEXT)))
 
+        if image_match and match == image_match:
+            alt_text = image_match.group(1)  # Text inside the square brackets
+            image_url = image_match.group(2) # URL inside the parentheses
+            # Create a ParentNode for the <img> tag
+            children.append(ParentNode("img", [], {'alt': alt_text, 'src': image_url}))
         # Check if the match is a link
-        if url_match and match == url_match:
+        elif url_match and match == url_match:
             link_text = url_match.group(1)  # Text inside the brackets
             link_url = url_match.group(2)   # URL inside the parentheses
             # Create a ParentNode for the <a> tag
